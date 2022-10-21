@@ -7,7 +7,7 @@ public enum OperatingSystem {
     WINDOWS64("Windows", 64),
     LINUX("Linux", 32),
     LINUX64("Linux", 64),
-    MACOS("Macos", 64),
+    MACOS("Mac", 64),
     UNKNOWN("", 0);
 
     private final String osName;

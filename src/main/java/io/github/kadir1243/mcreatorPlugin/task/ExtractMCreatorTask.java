@@ -3,6 +3,7 @@ package io.github.kadir1243.mcreatorPlugin.task;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.*;
 import org.gradle.api.model.ObjectFactory;
+import org.gradle.api.resources.ReadableResource;
 import org.gradle.api.tasks.InputFile;
 import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.TaskAction;
@@ -33,8 +34,8 @@ public class ExtractMCreatorTask extends DefaultTask {
                 copySpec.into(dest);
             });
         }
-        if (path.endsWith(".tar")) {
-            FileTree files = getInjectedArchiveOperations().tarTree(path);
+        if (path.endsWith(".gz")) {
+            ReadableResource files = getInjectedArchiveOperations().gzip(path);
             getInjectedFileSystemOperations().copy(copySpec -> {
                 copySpec.from(files);
                 copySpec.into(dest);

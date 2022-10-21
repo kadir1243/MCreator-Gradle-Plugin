@@ -1,5 +1,7 @@
-build
 .gradle
-.idea
-eclipse
-.idea/**
+/build/
+hs_err_pid*
+.DS_Store
+.AppleDouble
+.LSOverride
+/.idea/

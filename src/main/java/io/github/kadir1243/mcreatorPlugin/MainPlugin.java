@@ -9,7 +9,6 @@ import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.plugins.JavaPluginExtension;
-import org.gradle.api.provider.Property;
 import org.gradle.jvm.tasks.Jar;
 
 import java.nio.file.Path;
@@ -26,16 +25,17 @@ public class MainPlugin implements Plugin<Project> {
 
         MCreatorExtension mcreator = project.getExtensions().create(MCreatorExtension.class, "mcreator", DefaultMCreatorExtension.class, project.getObjects());
 
-        Property<String> version = mcreator.getMCreatorVersion();
+        String version = mcreator.getMCreatorVersion().get();
+        String buildNumber = mcreator.getMCreatorBuildNumber().get();
         Path homeDir = project.getGradle().getGradleUserHomeDir().toPath();
         OperatingSystem os = OperatingSystem.CURRENT;
 
         try {
             JavaPluginExtension extension = project.getExtensions().getByType(JavaPluginExtension.class);
-            if (Double.parseDouble(version.get()) > 2022.1) {
+            if (Double.parseDouble(version) > 2022.1) {
                 extension.setSourceCompatibility(JavaVersion.VERSION_17);
                 extension.setTargetCompatibility(JavaVersion.VERSION_17);
-            } else if (Double.parseDouble(version.get()) > 2021.3) {
+            } else if (Double.parseDouble(version) > 2021.3) {
                 extension.setSourceCompatibility(JavaVersion.VERSION_16);
                 extension.setTargetCompatibility(JavaVersion.VERSION_16);
             } else {
@@ -48,7 +48,7 @@ public class MainPlugin implements Plugin<Project> {
         switch (os) {
             case LINUX64:
             case LINUX:
-                extension = ".tar";
+                extension = ".tar.gz";
                 break;
             case MACOS:
                 extension = ".dmg";
@@ -62,23 +62,23 @@ public class MainPlugin implements Plugin<Project> {
                 throw new UnsupportedOperationException("Unknown operating system : " + System.getProperty("os.name"));
         }
 
-        Path downloadedMCreatorZip = homeDir.resolve("mcreator").resolve(version.get()).resolve(os.getOsName());
-        Path extractionOfMCreator = homeDir.resolve("mcreator").resolve(version.get() + "-extracted").resolve(os.getOsName());
+        Path downloadedMCreatorZip = homeDir.resolve("mcreator").resolve(version).resolve(os.getOsName());
+        Path extractionOfMCreator = homeDir.resolve("mcreator").resolve(version + "-extracted").resolve(os.getOsName());
 
-        Jar jar = (Jar) project.getTasks().getByName(JavaPlugin.JAR_TASK_NAME);
-        jar.getArchiveExtension().set("zip");
-        project.getTasks().create("downloadMCreator", DownloadMCreatorTask.class, task -> {
-            task.getOutput().set(downloadedMCreatorZip.toFile());
-            task.getUrl().set("https://mcreator.net/repository/" + version.get() + "/MCreator%20" + version.get() + "%20" + os.getOsName() + "%20" + os.getArch() + "bit" + extension);
-        });
-        project.getTasks().create("extractMCreator", ExtractMCreatorTask.class, task -> {
-            task.getZipPath().set(downloadedMCreatorZip.toFile());
-            task.getDestPath().set(extractionOfMCreator.toFile());
-        });
-        project.getTasks().create("runMCreator", RunMCreatorTask.class, task -> {
-            task.getPath2MCreator().set(extractionOfMCreator.toFile());
-            task.getVersion().set(version);
-        });
-        project.getDependencies().add(JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME, project.provider(() -> extractionOfMCreator));
+        ((Jar) project.getTasks().getByName(JavaPlugin.JAR_TASK_NAME)).getArchiveExtension().set("zip");
+
+        DownloadMCreatorTask downloadMCreatorTask = project.getTasks().create("downloadMCreator", DownloadMCreatorTask.class);
+        downloadMCreatorTask.getOutput().set(downloadedMCreatorZip.toFile());
+        downloadMCreatorTask.getUrl().set("https://github.com/MCreator/MCreator/releases/download/" + version + "." + buildNumber +"/MCreator." + version + "." + os.getOsName() + "." + os.getArch() + "bit" + extension);
+
+        ExtractMCreatorTask extractMCreatorTask = project.getTasks().create("extractMCreator", ExtractMCreatorTask.class);
+        extractMCreatorTask.getZipPath().set(downloadedMCreatorZip.toFile());
+        extractMCreatorTask.getDestPath().set(extractionOfMCreator.toFile());
+
+        RunMCreatorTask runMCreatorTask = project.getTasks().create("runMCreator", RunMCreatorTask.class);
+        runMCreatorTask.getPath2MCreator().set(extractionOfMCreator.toFile());
+        runMCreatorTask.getVersion().set(version);
+
+        project.getDependencies().add(JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME, project.fileTree(extractionOfMCreator.resolve("MCreator" + version.replace(".", "")).resolve("lib")));
     }
 }

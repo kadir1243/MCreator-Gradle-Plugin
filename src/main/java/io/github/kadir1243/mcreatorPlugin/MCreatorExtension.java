@@ -4,4 +4,8 @@ import org.gradle.api.provider.Property;
 
 public interface MCreatorExtension {
     Property<String> getMCreatorVersion();
+
+    Property<String> getMCreatorMainClass();
+
+    Property<String> getMCreatorBuildNumber();
 }
