@@ -99,8 +99,7 @@ public class MainPlugin implements Plugin<Project> {
                 file1 = file[0].toPath();
             }
             Path finalFile = file1;
-            //noinspection ConstantConditions
-            project.getDependencies().add(JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME, project.provider(() -> project.fileTree(finalFile.resolve("lib").toFile().listFiles())));
+            project.getDependencies().add(JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME, project.provider(() -> project.fileTree(project.getLayout().dir(project.provider(() -> finalFile.resolve("lib").toFile())))));
         }
     }
 
