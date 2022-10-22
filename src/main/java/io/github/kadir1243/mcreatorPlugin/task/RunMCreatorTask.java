@@ -5,9 +5,9 @@ import org.gradle.api.DefaultTask;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.Property;
+import org.gradle.api.specs.Spec;
 import org.gradle.api.tasks.*;
-import org.gradle.process.internal.ExecActionFactory;
-import org.gradle.process.internal.JavaExecAction;
+import org.gradle.process.ExecOperations;
 
 import javax.inject.Inject;
 import java.io.File;
@@ -43,17 +43,29 @@ public class RunMCreatorTask extends DefaultTask {
         getLogger().debug("mcreator path : " + path.getPath());
         File libraries = new File(path, "lib");
         getLogger().debug("mcreator library path : " + libraries.getPath());
-        JavaExecAction action = getInjectedExecActionFactory().newJavaExecAction();
-        action.classpath(getInjectedObjectFactory().fileTree().from(libraries));
-        action.getMainClass().set(extension.getMCreatorMainClass());
-        action.jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED");
-        action.environment("MCREATOR_PLUGINS_FOLDER", jarOutputs);
-        action.workingDir(path);
-        action.execute();
+        File finalPath = path;
+        getInjectedExecOperations().javaexec(execSpec -> {
+            execSpec.bootstrapClasspath(getInjectedObjectFactory().fileTree().from(libraries).filter(new Spec<File>() {
+                @Override
+                public boolean isSatisfiedBy(File f) {
+                    return !f.getName().equals("mcreator.jar");
+                }
+            }));
+            execSpec.classpath(getInjectedObjectFactory().fileTree().from(new File(libraries, "mcreator.jar")));
+            execSpec.getMainClass().set(extension.getMCreatorMainClass());
+            execSpec.jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED");
+            execSpec.environment("MCREATOR_PLUGINS_FOLDER", jarOutputs);
+            execSpec.workingDir(finalPath);
+        });
     }
 
     @Inject
     protected ObjectFactory getInjectedObjectFactory() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Inject
+    protected ExecOperations getInjectedExecOperations() {
         throw new UnsupportedOperationException();
     }
 
@@ -63,10 +75,5 @@ public class RunMCreatorTask extends DefaultTask {
 
     public Property<String> getVersion() {
         return version;
-    }
-
-    @Inject
-    protected ExecActionFactory getInjectedExecActionFactory() {
-        throw new UnsupportedOperationException();
     }
 }
