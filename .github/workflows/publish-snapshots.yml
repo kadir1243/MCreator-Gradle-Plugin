@@ -15,6 +15,7 @@ jobs:
           publishURL: "${{ secrets.PUBLISHURL }}"
           mavenName: "${{ secrets.MAVENNAME }}"
           mavenPassword: "${{ secrets.MAVENPASSWORD }}"
+      - run: chmod +x ./gradlew
 
       - run: |
           ./gradlew publish

@@ -16,7 +16,7 @@ public class TestVersionSettings {
     @BeforeEach
     public void prepareProject() {
         project = ProjectBuilder.builder().build();
-        project.apply(Collections.singletonMap("plugin", "io.github.kadir1243.mcreatorPlugin"));
+        project.apply(Collections.singletonMap("plugin", "mcreatorPlugin"));
     }
 
     @Test
@@ -25,6 +25,6 @@ public class TestVersionSettings {
     @Test
     public void test20221() {
         MCreatorExtension type = project.getExtensions().getByType(MCreatorExtension.class);
-        type.getMCreatorVersion().set("2022.1");
+        type.getMCreatorVersion().set("2022.1.20510");
     }
 }

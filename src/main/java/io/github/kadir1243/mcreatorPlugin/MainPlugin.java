@@ -25,8 +25,13 @@ public class MainPlugin implements Plugin<Project> {
 
         MCreatorExtension mcreator = project.getExtensions().create(MCreatorExtension.class, "mcreator", DefaultMCreatorExtension.class, project.getObjects());
 
-        String version = mcreator.getMCreatorVersion().get();
-        String buildNumber = mcreator.getMCreatorBuildNumber().get();
+        String versionedBuildNumber = mcreator.getMCreatorVersion().get();
+        int v = versionedBuildNumber.lastIndexOf('.');
+        if (v == -1) {
+            throw new UnsupportedOperationException("No Build Number");
+        }
+        String version = versionedBuildNumber.substring(0, v);
+        String buildNumber = versionedBuildNumber.substring(v + 1);
         Path homeDir = project.getGradle().getGradleUserHomeDir().toPath();
         OperatingSystem os = OperatingSystem.CURRENT;
 
