@@ -15,7 +15,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Java 8
+      - name: Set up Java
         uses: actions/setup-java@v3
         with:
           distribution: 'zulu'

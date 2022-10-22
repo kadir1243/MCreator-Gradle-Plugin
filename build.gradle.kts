@@ -42,6 +42,10 @@ gradlePlugin {
     }
 }
 
+tasks.wrapper {
+    distributionType = Wrapper.DistributionType.ALL
+}
+
 publishing {
     publications {
         create<MavenPublication>("maven") {

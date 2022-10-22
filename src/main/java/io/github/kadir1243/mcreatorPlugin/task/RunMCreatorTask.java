@@ -5,10 +5,7 @@ import org.gradle.api.DefaultTask;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.Property;
-import org.gradle.api.tasks.CacheableTask;
-import org.gradle.api.tasks.Input;
-import org.gradle.api.tasks.InputDirectory;
-import org.gradle.api.tasks.TaskAction;
+import org.gradle.api.tasks.*;
 import org.gradle.process.internal.ExecActionFactory;
 import org.gradle.process.internal.JavaExecAction;
 
@@ -21,6 +18,7 @@ public class RunMCreatorTask extends DefaultTask {
     private final MCreatorExtension extension = getProject().getExtensions().findByType(MCreatorExtension.class);
     private final Set<File> jarOutputs;
     @InputDirectory
+    @PathSensitive(PathSensitivity.ABSOLUTE)
     private final RegularFileProperty path2MCreator = getInjectedObjectFactory().fileProperty();
     @Input
     private final Property<String> version = getInjectedObjectFactory().property(String.class);
