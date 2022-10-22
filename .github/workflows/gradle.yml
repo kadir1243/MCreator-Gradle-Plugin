@@ -10,8 +10,8 @@ jobs:
         - "windows-latest"
         - "macos-latest"
       java_version:
-        - '8',
-        - '11',
+        - '8'
+        - '11'
         - '17'
     runs-on: ${{ matrix.os }}
 
