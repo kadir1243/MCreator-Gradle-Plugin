@@ -91,7 +91,15 @@ public class MainPlugin implements Plugin<Project> {
         runMCreatorTask.getPath2MCreator().set(extractionOfMCreator.toFile());
         runMCreatorTask.getVersion().set(versionedBuildNumber);
 
-        project.getDependencies().add(JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME, project.fileTree(extractionOfMCreator.resolve("MCreator" + versionedBuildNumber.replace(".", "")).resolve("lib")));
+        File[] file = extractionOfMCreator.toFile().listFiles();
+        Path file1 = extractionOfMCreator;
+        if (file != null) {
+            if (file.length == 1) {
+                file1 = file[0].toPath();
+            }
+            //noinspection ConstantConditions
+            project.getDependencies().add(JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME, project.files((Object[]) file1.resolve("lib").toFile().listFiles()));
+        }
     }
 
     public static void download(String remotePath, File localPath, Logger logger) {
