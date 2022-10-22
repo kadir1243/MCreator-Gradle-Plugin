@@ -12,6 +12,9 @@ import org.gradle.api.tasks.TaskAction;
 
 import javax.inject.Inject;
 import java.io.File;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 @CacheableTask
 public class DownloadMCreatorTask extends DefaultTask {
@@ -22,6 +25,26 @@ public class DownloadMCreatorTask extends DefaultTask {
 
     public DownloadMCreatorTask() {
         setGroup("mcreator");
+        getOutputs().upToDateWhen(e -> {
+            File file = output.getAsFile().get();
+            try {
+                HttpURLConnection conn = null;
+                try {
+                    conn = (HttpURLConnection) new URL(url.get()).openConnection();
+                    conn.setRequestMethod("HEAD");
+                    if (file.length() == conn.getContentLengthLong()) {
+                        return true;
+                    }
+                } catch (IOException ignored) {} finally {
+                    if (conn != null) {
+                        conn.disconnect();
+                    }
+                }
+            } catch (Throwable ignored) {
+                return false;
+            }
+            return false;
+        });
     }
 
     @TaskAction

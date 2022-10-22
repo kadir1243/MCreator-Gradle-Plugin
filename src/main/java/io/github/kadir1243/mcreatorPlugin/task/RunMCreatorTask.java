@@ -48,6 +48,7 @@ public class RunMCreatorTask extends DefaultTask {
         action.getMainClass().set(extension.getMCreatorMainClass());
         action.jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED");
         action.environment("MCREATOR_PLUGINS_FOLDER", jarOutputs);
+        action.workingDir(path);
         action.execute();
     }
 

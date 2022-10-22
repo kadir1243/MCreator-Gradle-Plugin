@@ -20,6 +20,17 @@ public class ExtractMCreatorTask extends DefaultTask {
     public ExtractMCreatorTask() {
         dependsOn("downloadMCreator");
         setGroup("mcreator");
+        getOutputs().upToDateWhen(e -> {
+            File file = zipPath.getAsFile().get();
+            if (file.exists()) {
+                if (file.getName().endsWith(".zip")) {
+                    FileTree files = getInjectedArchiveOperations().zipTree(file);
+                    FileTree asFileTree = destPath.getAsFileTree();
+                    return asFileTree.getFiles().equals(files.getFiles());
+                }
+            }
+            return false;
+        });
     }
 
     @TaskAction
