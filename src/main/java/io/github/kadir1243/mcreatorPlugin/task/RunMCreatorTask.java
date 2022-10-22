@@ -24,14 +24,22 @@ public class RunMCreatorTask extends DefaultTask {
     private final Property<String> version = getInjectedObjectFactory().property(String.class);
 
     public RunMCreatorTask() {
+        dependsOn("extractMCreator");
         jarOutputs = dependsOn("jar").getOutputs().getFiles().getFiles();
         setGroup("mcreator");
     }
 
     @TaskAction
     public void doTask() {
-        File file = path2MCreator.get().getAsFile();
-        File path = new File(file, "MCreator" + version.get().replace(".", ""));
+        File file = path2MCreator.getAsFile().get();
+        File[] files = file.listFiles();
+        File path = file;
+        if (files == null || files.length == 0) {
+            throw new IllegalStateException("is it downloaded right files ?");
+        }
+        if (files.length == 1) {
+            path = files[0];
+        }
         getLogger().debug("mcreator path : " + path.getPath());
         File libraries = new File(path, "lib");
         getLogger().debug("mcreator library path : " + libraries.getPath());
