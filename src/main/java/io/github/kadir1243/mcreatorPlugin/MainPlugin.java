@@ -112,12 +112,17 @@ public class MainPlugin implements Plugin<Project> {
             int count;
             double sumCount = 0.0;
 
+            int i;
+            int i1 = 0;
             while ((count = in.read(data, 0, 1024)) != -1) {
                 out.write(data, 0, count);
 
                 sumCount += count;
                 if (size > 0) {
-                    logger.info((sumCount / size * 100.0) + "% Downloaded");
+                    i = (int) (sumCount / size * 100.0);
+                    if (i != i1)
+                        logger.info(i + "% Downloaded");
+                    i1 = i;
                 }
             }
             in.close();
