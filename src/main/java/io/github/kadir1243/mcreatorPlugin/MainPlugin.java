@@ -91,14 +91,15 @@ public class MainPlugin implements Plugin<Project> {
         runMCreatorTask.getPath2MCreator().set(extractionOfMCreator.toFile());
         runMCreatorTask.getVersion().set(versionedBuildNumber);
 
+        project.defaultTasks("extractMCreator");
         File[] file = extractionOfMCreator.toFile().listFiles();
         Path file1 = extractionOfMCreator;
         if (file != null) {
             if (file.length == 1) {
                 file1 = file[0].toPath();
             }
-            //noinspection ConstantConditions
-            project.getDependencies().add(JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME, project.files((Object[]) file1.resolve("lib").toFile().listFiles()));
+            Path finalFile = file1;
+            project.getDependencies().add(JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME, project.provider(() -> (Object[]) finalFile.resolve("lib").toFile().listFiles()));
         }
     }
 
