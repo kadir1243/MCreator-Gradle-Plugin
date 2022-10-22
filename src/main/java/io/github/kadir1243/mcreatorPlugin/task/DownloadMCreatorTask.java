@@ -1,5 +1,6 @@
 package io.github.kadir1243.mcreatorPlugin.task;
 
+import io.github.kadir1243.mcreatorPlugin.MainPlugin;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.model.ObjectFactory;
@@ -11,11 +12,6 @@ import org.gradle.api.tasks.TaskAction;
 
 import javax.inject.Inject;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 
 @CacheableTask
 public class DownloadMCreatorTask extends DefaultTask {
@@ -24,13 +20,16 @@ public class DownloadMCreatorTask extends DefaultTask {
     @OutputFile
     private final RegularFileProperty output = getInjectedObjectFactory().fileProperty();
 
+    public DownloadMCreatorTask() {
+        setGroup("mcreator");
+    }
+
     @TaskAction
-    public void doTask() throws IOException {
+    public void doTask() {
         File file = output.getAsFile().get();
         file.getParentFile().mkdirs();
-        try(InputStream in = new URL(url.get()).openStream()) {
-            Files.copy(in, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
-        }
+        getLogger().info("Downloading From Url: " + url.getOrElse("unknown"));
+        MainPlugin.download(this.url.get(), file, getLogger());
     }
 
     public RegularFileProperty getOutput() {

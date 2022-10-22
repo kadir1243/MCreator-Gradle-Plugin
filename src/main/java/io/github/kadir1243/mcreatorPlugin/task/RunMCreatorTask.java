@@ -25,13 +25,16 @@ public class RunMCreatorTask extends DefaultTask {
 
     public RunMCreatorTask() {
         jarOutputs = dependsOn("jar").getOutputs().getFiles().getFiles();
+        setGroup("mcreator");
     }
 
     @TaskAction
     public void doTask() {
         File file = path2MCreator.get().getAsFile();
         File path = new File(file, "MCreator" + version.get().replace(".", ""));
+        getLogger().debug("mcreator path : " + path.getPath());
         File libraries = new File(path, "lib");
+        getLogger().debug("mcreator library path : " + libraries.getPath());
         JavaExecAction action = getInjectedExecActionFactory().newJavaExecAction();
         action.classpath(getInjectedObjectFactory().fileTree().from(libraries));
         action.getMainClass().set(extension.getMCreatorMainClass());

@@ -10,7 +10,6 @@ import org.gradle.api.tasks.TaskAction;
 
 import javax.inject.Inject;
 import java.io.File;
-import java.nio.file.Path;
 
 public class ExtractMCreatorTask extends DefaultTask {
     @InputFile
@@ -20,26 +19,21 @@ public class ExtractMCreatorTask extends DefaultTask {
 
     public ExtractMCreatorTask() {
         dependsOn("downloadMCreator");
+        setGroup("mcreator");
     }
 
     @TaskAction
     public void doTask() {
-        Path path = zipPath.getAsFile().get().toPath();
-        File dest = destPath.get().getAsFile();
+        File path = zipPath.getAsFile().get();
+        File dest = destPath.getAsFile().get();
         dest.getParentFile().mkdirs();
-        if (path.endsWith(".zip")) {
+        if (path.getName().endsWith(".zip")) {
             FileTree files = getInjectedArchiveOperations().zipTree(path);
-            getInjectedFileSystemOperations().copy(copySpec -> {
-                copySpec.from(files);
-                copySpec.into(dest);
-            });
+            getInjectedFileSystemOperations().copy(copySpec -> copySpec.from(files).into(dest));
         }
-        if (path.endsWith(".gz")) {
+        if (path.getName().endsWith(".gz")) {
             ReadableResource files = getInjectedArchiveOperations().gzip(path);
-            getInjectedFileSystemOperations().copy(copySpec -> {
-                copySpec.from(files);
-                copySpec.into(dest);
-            });
+            getInjectedFileSystemOperations().copy(copySpec -> copySpec.from(files).into(dest));
         }
     }
 

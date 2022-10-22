@@ -7,10 +7,17 @@ import io.github.kadir1243.mcreatorPlugin.task.RunMCreatorTask;
 import org.gradle.api.JavaVersion;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
+import org.gradle.api.logging.Logger;
 import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.jvm.tasks.Jar;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.nio.file.Path;
 
 public class MainPlugin implements Plugin<Project> {
@@ -67,8 +74,8 @@ public class MainPlugin implements Plugin<Project> {
                 throw new UnsupportedOperationException("Unknown operating system : " + System.getProperty("os.name"));
         }
 
-        Path downloadedMCreatorZip = homeDir.resolve("mcreator").resolve(version).resolve(os.getOsName());
-        Path extractionOfMCreator = homeDir.resolve("mcreator").resolve(version + "-extracted").resolve(os.getOsName());
+        Path downloadedMCreatorZip = homeDir.resolve("mcreator").resolve(versionedBuildNumber).resolve(os.getOsName() + extension);
+        Path extractionOfMCreator = homeDir.resolve("mcreator").resolve(versionedBuildNumber + "-extracted").resolve(os.getOsName());
 
         ((Jar) project.getTasks().getByName(JavaPlugin.JAR_TASK_NAME)).getArchiveExtension().set("zip");
 
@@ -82,8 +89,41 @@ public class MainPlugin implements Plugin<Project> {
 
         RunMCreatorTask runMCreatorTask = project.getTasks().create("runMCreator", RunMCreatorTask.class);
         runMCreatorTask.getPath2MCreator().set(extractionOfMCreator.toFile());
-        runMCreatorTask.getVersion().set(version);
+        runMCreatorTask.getVersion().set(versionedBuildNumber);
 
-        project.getDependencies().add(JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME, project.fileTree(extractionOfMCreator.resolve("MCreator" + version.replace(".", "")).resolve("lib")));
+        project.getDependencies().add(JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME, project.fileTree(extractionOfMCreator.resolve("MCreator" + versionedBuildNumber.replace(".", "")).resolve("lib")));
+    }
+
+    public static void download(String remotePath, File localPath, Logger logger) {
+        try {
+            URL url = new URL(remotePath);
+            URLConnection conn = url.openConnection();
+            int size = conn.getContentLength();
+
+            if (size < 0) {
+                logger.error("Could not get the file size");
+            } else {
+                logger.info("File size: " + size);
+            }
+
+            BufferedInputStream in = new BufferedInputStream(url.openStream());
+            FileOutputStream out = new FileOutputStream(localPath);
+            byte[] data = new byte[1024];
+            int count;
+            double sumCount = 0.0;
+
+            while ((count = in.read(data, 0, 1024)) != -1) {
+                out.write(data, 0, count);
+
+                sumCount += count;
+                if (size > 0) {
+                    logger.info((sumCount / size * 100.0) + "% Downloaded");
+                }
+            }
+            in.close();
+            out.close();
+        } catch (IOException e) {
+            logger.trace("Error Happened when downloading " + remotePath, e);
+        }
     }
 }
