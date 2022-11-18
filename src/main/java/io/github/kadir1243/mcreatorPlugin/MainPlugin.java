@@ -80,20 +80,20 @@ public class MainPlugin implements Plugin<Project> {
 
         ((Jar) project.getTasks().getByName(JavaPlugin.JAR_TASK_NAME)).getArchiveExtension().set("zip");
 
-        project.getTasks().create("downloadMCreator", DownloadMCreatorTask.class, task -> {
+        project.getTasks().register("downloadMCreator", DownloadMCreatorTask.class, task -> {
             task.setGroup("mcreator");
             task.getOutput().set(downloadedMCreatorZip.toFile());
             task.getUrl().set("https://github.com/MCreator/MCreator/releases/download/" + version + "." + buildNumber +"/MCreator." + version + "." + os.getOsName() + "." + os.getArch() + "bit" + extension);
         });
 
-        project.getTasks().create("extractMCreator", ExtractMCreatorTask.class, task -> {
+        project.getTasks().register("extractMCreator", ExtractMCreatorTask.class, task -> {
             task.dependsOn("downloadMCreator");
             task.setGroup("mcreator");
             task.getZipPath().set(downloadedMCreatorZip.toFile());
             task.getDestPath().set(extractionOfMCreator.toFile());
         });
 
-        project.getTasks().create("runMCreator", RunMCreatorTask.class, task -> {
+        project.getTasks().register("runMCreator", RunMCreatorTask.class, task -> {
             task.dependsOn("extractMCreator");
             task.setGroup("mcreator");
             task.getPath2MCreator().set(extractionOfMCreator.toFile());
@@ -117,7 +117,7 @@ public class MainPlugin implements Plugin<Project> {
         });
     }
 
-    public static void download(String remotePath, File localPath, Logger logger) {
+    public static void download(String remotePath, File localPath, Logger logger, boolean logProgress) {
         try {
             URL url = new URL(remotePath);
             URLConnection conn = url.openConnection();
@@ -141,7 +141,7 @@ public class MainPlugin implements Plugin<Project> {
                 out.write(data, 0, count);
 
                 sumCount += count;
-                if (size > 0) {
+                if (logProgress && size > 0) {
                     i = (int) (sumCount / size * 100.0);
                     if (i != i1)
                         logger.info(i + "% Downloaded");

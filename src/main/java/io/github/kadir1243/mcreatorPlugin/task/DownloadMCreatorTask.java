@@ -13,10 +13,10 @@ import java.io.File;
 
 @CacheableTask
 public class DownloadMCreatorTask extends DefaultTask {
-    @Input
-    private final Property<String> url = getInjectedObjectFactory().property(String.class);
     @Internal
     private final MCreatorExtension extension = getProject().getExtensions().getByType(MCreatorExtension.class);
+    @Input
+    private final Property<String> url = getInjectedObjectFactory().property(String.class);
     @OutputFile
     private final RegularFileProperty output = getInjectedObjectFactory().fileProperty();
 
@@ -30,7 +30,7 @@ public class DownloadMCreatorTask extends DefaultTask {
         file.getParentFile().mkdirs();
         String remotePath = this.url.get();
         getLogger().info("Downloading From Url: " + remotePath);
-        MainPlugin.download(remotePath, file, getLogger());
+        MainPlugin.download(remotePath, file, getLogger(), extension.logProgressOfDownload().get());
     }
 
     public RegularFileProperty getOutput() {
@@ -43,6 +43,6 @@ public class DownloadMCreatorTask extends DefaultTask {
 
     @Inject
     protected ObjectFactory getInjectedObjectFactory() {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Should be injected");
     }
 }

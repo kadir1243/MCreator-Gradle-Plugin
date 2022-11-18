@@ -8,4 +8,6 @@ public interface MCreatorExtension {
     Property<String> getMCreatorMainClass();
 
     Property<Boolean> forceDownload();
+
+    Property<Boolean> logProgressOfDownload();
 }

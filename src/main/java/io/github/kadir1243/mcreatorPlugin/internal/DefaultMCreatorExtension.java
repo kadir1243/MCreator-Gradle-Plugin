@@ -8,6 +8,7 @@ public class DefaultMCreatorExtension implements MCreatorExtension {
     private final Property<String> mcreatorVersion;
     private final Property<String> mcreatorMainClass;
     private final Property<Boolean> forceDownload;
+    private final Property<Boolean> logProgressOfDownload;
 
     public DefaultMCreatorExtension(ObjectFactory factory) {
         mcreatorVersion = factory.property(String.class);
@@ -16,6 +17,8 @@ public class DefaultMCreatorExtension implements MCreatorExtension {
         mcreatorMainClass.convention("net.mcreator.Launcher");
         forceDownload = factory.property(Boolean.class);
         forceDownload.convention(false);
+        logProgressOfDownload = factory.property(Boolean.class);
+        logProgressOfDownload.convention(true);
     }
 
     @Override
@@ -31,5 +34,10 @@ public class DefaultMCreatorExtension implements MCreatorExtension {
     @Override
     public Property<Boolean> forceDownload() {
         return forceDownload;
+    }
+
+    @Override
+    public Property<Boolean> logProgressOfDownload() {
+        return logProgressOfDownload;
     }
 }
