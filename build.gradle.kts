@@ -2,15 +2,10 @@ plugins {
     java
     `java-gradle-plugin`
     `maven-publish`
-    id("com.sarhanm.versioner") version "4.1.9"
-}
-
-versioner {
-    omitBranchMetadata=true
 }
 
 group = "io.github.kadir1243"
-version = "${project.property("version")!!}-${gitdata.commit}"
+version = "${project.property("version")!!}"
 
 base {
     archivesName.set("mcreatorPlugin")

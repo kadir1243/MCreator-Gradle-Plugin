@@ -7,12 +7,15 @@ import org.gradle.api.provider.Property;
 public class DefaultMCreatorExtension implements MCreatorExtension {
     private final Property<String> mcreatorVersion;
     private final Property<String> mcreatorMainClass;
+    private final Property<Boolean> forceDownload;
 
     public DefaultMCreatorExtension(ObjectFactory factory) {
         mcreatorVersion = factory.property(String.class);
         mcreatorVersion.convention("2022.2.34517");
         mcreatorMainClass = factory.property(String.class);
         mcreatorMainClass.convention("net.mcreator.Launcher");
+        forceDownload = factory.property(Boolean.class);
+        forceDownload.convention(false);
     }
 
     @Override
@@ -23,5 +26,10 @@ public class DefaultMCreatorExtension implements MCreatorExtension {
     @Override
     public Property<String> getMCreatorMainClass() {
         return mcreatorMainClass;
+    }
+
+    @Override
+    public Property<Boolean> forceDownload() {
+        return forceDownload;
     }
 }

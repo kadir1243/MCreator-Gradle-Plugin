@@ -17,11 +17,6 @@ public class ExtractMCreatorTask extends DefaultTask {
     @OutputDirectory
     private final DirectoryProperty destPath = getInjectedObjectFactory().directoryProperty();
 
-    public ExtractMCreatorTask() {
-        dependsOn("downloadMCreator");
-        setGroup("mcreator");
-    }
-
     @TaskAction
     public void doTask() {
         File path = zipPath.getAsFile().get();

@@ -6,4 +6,6 @@ public interface MCreatorExtension {
     Property<String> getMCreatorVersion();
 
     Property<String> getMCreatorMainClass();
+
+    Property<Boolean> forceDownload();
 }

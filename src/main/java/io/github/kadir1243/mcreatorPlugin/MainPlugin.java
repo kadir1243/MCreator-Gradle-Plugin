@@ -4,6 +4,7 @@ import io.github.kadir1243.mcreatorPlugin.internal.DefaultMCreatorExtension;
 import io.github.kadir1243.mcreatorPlugin.task.DownloadMCreatorTask;
 import io.github.kadir1243.mcreatorPlugin.task.ExtractMCreatorTask;
 import io.github.kadir1243.mcreatorPlugin.task.RunMCreatorTask;
+import org.gradle.api.Action;
 import org.gradle.api.JavaVersion;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
@@ -79,28 +80,41 @@ public class MainPlugin implements Plugin<Project> {
 
         ((Jar) project.getTasks().getByName(JavaPlugin.JAR_TASK_NAME)).getArchiveExtension().set("zip");
 
-        DownloadMCreatorTask downloadMCreatorTask = project.getTasks().create("downloadMCreator", DownloadMCreatorTask.class);
-        downloadMCreatorTask.getOutput().set(downloadedMCreatorZip.toFile());
-        downloadMCreatorTask.getUrl().set("https://github.com/MCreator/MCreator/releases/download/" + version + "." + buildNumber +"/MCreator." + version + "." + os.getOsName() + "." + os.getArch() + "bit" + extension);
+        project.getTasks().create("downloadMCreator", DownloadMCreatorTask.class, task -> {
+            task.setGroup("mcreator");
+            task.getOutput().set(downloadedMCreatorZip.toFile());
+            task.getUrl().set("https://github.com/MCreator/MCreator/releases/download/" + version + "." + buildNumber +"/MCreator." + version + "." + os.getOsName() + "." + os.getArch() + "bit" + extension);
+        });
 
-        ExtractMCreatorTask extractMCreatorTask = project.getTasks().create("extractMCreator", ExtractMCreatorTask.class);
-        extractMCreatorTask.getZipPath().set(downloadedMCreatorZip.toFile());
-        extractMCreatorTask.getDestPath().set(extractionOfMCreator.toFile());
+        project.getTasks().create("extractMCreator", ExtractMCreatorTask.class, task -> {
+            task.dependsOn("downloadMCreator");
+            task.setGroup("mcreator");
+            task.getZipPath().set(downloadedMCreatorZip.toFile());
+            task.getDestPath().set(extractionOfMCreator.toFile());
+        });
 
-        RunMCreatorTask runMCreatorTask = project.getTasks().create("runMCreator", RunMCreatorTask.class);
-        runMCreatorTask.getPath2MCreator().set(extractionOfMCreator.toFile());
-        runMCreatorTask.getVersion().set(versionedBuildNumber);
+        project.getTasks().create("runMCreator", RunMCreatorTask.class, task -> {
+            task.dependsOn("extractMCreator");
+            task.setGroup("mcreator");
+            task.getPath2MCreator().set(extractionOfMCreator.toFile());
+            task.getVersion().set(versionedBuildNumber);
+        });
 
         project.defaultTasks("extractMCreator");
         File[] file = extractionOfMCreator.toFile().listFiles();
-        Path file1 = extractionOfMCreator;
-        if (file != null) {
-            if (file.length == 1) {
-                file1 = file[0].toPath();
+        final Path[] file1 = {extractionOfMCreator};
+        project.afterEvaluate(new Action<Project>() {
+            @Override
+            public void execute(Project project) {
+                if (file != null && file.length != 0) {
+                    if (file.length == 1) {
+                        file1[0] = file[0].toPath();
+                    }
+                    Path finalFile = file1[0];
+                    project.getDependencies().add(JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME, project.provider(() -> project.fileTree(project.getLayout().dir(project.provider(() -> finalFile.resolve("lib").toFile())))));
+                }
             }
-            Path finalFile = file1;
-            project.getDependencies().add(JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME, project.provider(() -> project.fileTree(project.getLayout().dir(project.provider(() -> finalFile.resolve("lib").toFile())))));
-        }
+        });
     }
 
     public static void download(String remotePath, File localPath, Logger logger) {

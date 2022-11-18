@@ -5,7 +5,6 @@ import org.gradle.api.DefaultTask;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.Property;
-import org.gradle.api.specs.Spec;
 import org.gradle.api.tasks.*;
 import org.gradle.process.ExecOperations;
 
@@ -16,18 +15,12 @@ import java.util.Set;
 @CacheableTask
 public class RunMCreatorTask extends DefaultTask {
     private final MCreatorExtension extension = getProject().getExtensions().findByType(MCreatorExtension.class);
-    private final Set<File> jarOutputs;
+    private final Set<File> jarOutputs = dependsOn("jar").getOutputs().getFiles().getFiles();
     @InputDirectory
     @PathSensitive(PathSensitivity.ABSOLUTE)
     private final RegularFileProperty path2MCreator = getInjectedObjectFactory().fileProperty();
     @Input
     private final Property<String> version = getInjectedObjectFactory().property(String.class);
-
-    public RunMCreatorTask() {
-        dependsOn("extractMCreator");
-        jarOutputs = dependsOn("jar").getOutputs().getFiles().getFiles();
-        setGroup("mcreator");
-    }
 
     @TaskAction
     public void doTask() {
@@ -45,12 +38,7 @@ public class RunMCreatorTask extends DefaultTask {
         getLogger().debug("mcreator library path : " + libraries.getPath());
         File finalPath = path;
         getInjectedExecOperations().javaexec(execSpec -> {
-            execSpec.bootstrapClasspath(getInjectedObjectFactory().fileTree().from(libraries).filter(new Spec<File>() {
-                @Override
-                public boolean isSatisfiedBy(File f) {
-                    return !f.getName().equals("mcreator.jar");
-                }
-            }));
+            execSpec.bootstrapClasspath(getInjectedObjectFactory().fileTree().from(libraries).filter(f -> !f.getName().equals("mcreator.jar")));
             execSpec.classpath(getInjectedObjectFactory().fileTree().from(new File(libraries, "mcreator.jar")));
             execSpec.getMainClass().set(extension.getMCreatorMainClass());
             execSpec.jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED");
