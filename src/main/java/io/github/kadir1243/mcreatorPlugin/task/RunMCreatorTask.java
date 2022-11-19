@@ -14,6 +14,7 @@ import java.util.Set;
 
 @CacheableTask
 public class RunMCreatorTask extends DefaultTask {
+    @Internal
     private final MCreatorExtension extension = getProject().getExtensions().findByType(MCreatorExtension.class);
     private final Set<File> jarOutputs = dependsOn("jar").getOutputs().getFiles().getFiles();
     @InputDirectory
