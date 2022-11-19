@@ -13,7 +13,6 @@ import java.io.File;
 
 @CacheableTask
 public class DownloadMCreatorTask extends DefaultTask {
-    @Internal
     private final MCreatorExtension extension = getProject().getExtensions().getByType(MCreatorExtension.class);
     @Input
     private final Property<String> url = getInjectedObjectFactory().property(String.class);
